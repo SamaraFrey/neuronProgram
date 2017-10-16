@@ -1,0 +1,40 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/samarafrey/Desktop/EPFL/BA Se 3/Programmation/SV Project/SV Project/constants.h
+
+/Users/samarafrey/Desktop/EPFL/BA Se 3/Programmation/SV Project/SV Project/main.cpp
+neuron.hpp
+/Users/samarafrey/Desktop/EPFL/BA Se 3/Programmation/SV Project/SV Project/neuron.hpp
+constants.h
+/Users/samarafrey/Desktop/EPFL/BA Se 3/Programmation/SV Project/SV Project/constants.h
+cmath
+-
+iostream
+-
+fstream
+-
+
+/Users/samarafrey/Desktop/EPFL/BA Se 3/Programmation/SV Project/SV Project/neuron.cpp
+neuron.hpp
+/Users/samarafrey/Desktop/EPFL/BA Se 3/Programmation/SV Project/SV Project/neuron.hpp
+constants.h
+/Users/samarafrey/Desktop/EPFL/BA Se 3/Programmation/SV Project/SV Project/constants.h
+iostream
+-
+cmath
+-
+vector
+-
+
+/Users/samarafrey/Desktop/EPFL/BA Se 3/Programmation/SV Project/SV Project/neuron.hpp
+stdio.h
+-
+vector
+-
+
