@@ -9,6 +9,7 @@
 #ifndef neuron_hpp
 #define neuron_hpp
 
+#include "constants.h"
 #include <stdio.h>
 #include <vector>
 
@@ -20,6 +21,7 @@ private:
     double memPot; //initial value to be 0 //unit mV
     int nbrSp;
     double timeSp; //#when spikes occured //unit ms
+    double neuronJ;
     
     int clock; //local clock
     
@@ -47,7 +49,6 @@ public:
     Neuron getConnectNeuron(int i);
     bool receive(int time);
 
-    //setters&getters might be useful for later
     //setters
     void setMemPot(double a){
         memPot = a;
@@ -59,6 +60,10 @@ public:
     
     void setTimeSp(double a){
         timeSp = a;
+    }
+    
+    void setNeuronJ(double J){
+        neuronJ = J;
     }
     
     
