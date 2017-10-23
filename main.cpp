@@ -9,6 +9,7 @@
 #include "constants.h"
 
 #include <cmath>
+#include <cassert>
 #include <iostream>
 #include <fstream>
 
@@ -28,6 +29,7 @@ struct Interval{
     double end;
 };
 
+void checkValue(double value);
 double setExtCurr();
 Interval setInterval();
 
@@ -36,17 +38,19 @@ int main() {
 
     cout << "How many neurons do you want? //enter 3 for the moment!" << endl;
     cin >> nbr;
+    checkValue(nbr); //check so it so not <=0
+    
     vector<Neuron> allNeuron(nbr); //vectors with all the neurons
+    
+    //give neurons values manually
+    allNeuron[0] = Neuron(3,0,0);
+    allNeuron[1] = Neuron(2,0,0);
+    allNeuron[2] = Neuron(1,0,0);
     
     //connect them manually (for now)
     allNeuron[0].addConnect(allNeuron[1]);
     allNeuron[0].addConnect(allNeuron[2]);
     allNeuron[1].addConnect(allNeuron[2]);
-    
-    if(nbr <=0){
-        cout << "your amount of neurons doesn't make sense." << endl;
-        return 0;
-    }
     
     //get the time interval
     int time = 0; //starting with 0; global clock
@@ -55,7 +59,7 @@ int main() {
     Interval enteredI = setInterval();
     
     
-    int timeStop;
+    int timeStop; //steps
     double val = enteredI.end - enteredI.start;
     timeStop = val/h; //gives me times of step
     timeStop += time; //bc time line
@@ -80,7 +84,8 @@ int main() {
     //Step 1: calculate newMemPot and store values
     while(time <= timeStop){ //we increment always by h (which is const and defined in constants.h as long as I'm still in my intervall
         for(size_t i = 0; i < allNeuron.size(); ++i){
-            bool spiked = allNeuron[i].update(time, extCurr);
+            bool spiked;
+            spiked = allNeuron[i].update(time, extCurr);
             
             cout << "bobibob" << endl;
             if(spiked){
@@ -91,7 +96,8 @@ int main() {
 
                 //if spiked also tell to buffer in connected neurons
                 for(size_t p; p < allNeuron[i].getConnecSize(); ++p){
-                    allNeuron[i].getConnectNeuron(p+1).receive(time); //bc first one is nullptr; i add D in function receive
+                    bool worked = allNeuron[i].getConnectNeuron(p+1).receive(time); //bc first one is nullptr; i add D in function receive
+                    assert(worked == false); //if receiving didn't work we are going to stop the programm
                 }
                
             }
@@ -116,10 +122,21 @@ int main() {
     return 0;
 }
 
+//to check value
+void checkValue(double value){
+    if (value<=0){
+        cout << "Your value is impossible." << endl;
+        EXIT_FAILURE;
+    }
+}
+
 double setExtCurr(){
     double val;
     cout << "Please enter your value for external current:   ";
     cin >> val;
+    
+    checkValue(val);
+    
     return val;
 }
 
@@ -128,9 +145,13 @@ Interval setInterval(){
     cout << "Please enter your value for the Start of the time Interval:   ";
     cin >> val;
     
+    checkValue(val);
+    
     double val2;
     cout << "Please enter your value for the End of the time Interval:   ";
     cin >> val2;
+    
+    checkValue(val2);
     
     Interval interval = {val, val2};
     return interval;

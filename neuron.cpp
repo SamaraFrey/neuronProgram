@@ -13,8 +13,7 @@
 
 //has own local clock
 
-//change inputconnec
-//print overwrite operator
+//Idea: overwrite print operator
 
 #include "neuron.hpp"
 #include "constants.h"
@@ -33,8 +32,8 @@ Neuron::Neuron(double p, int sp, double t){
     
     connections.push_back(nullptr); //for debugging purposes
     
-    int bufferSize = D/h + 1;
-    vector <unsigned int> buffer (bufferSize);
+    int bufferSize = D/h + 1; //bc D is constant (given in paper)
+    vector <unsigned int> buffer (bufferSize); //buffer of size, with all entries to be zero
 }
 
 Neuron::Neuron(){} //default
@@ -53,8 +52,14 @@ void Neuron::putInVector(double time){
 }
 
 bool Neuron::update(int time, double extCurr){
+    //since buffer has size D/h+1 the time is gonna exeed it fast
+    int timeStep = time;
+    do{
+        timeStep -= (D/h + 1);
+    }while(timeStep > (D/h+1));
+    
     //count the received spikes
-    int spikeNbr = buffer[time];
+    int spikeNbr = buffer[timeStep];
     bool spiking = false;
     
     if(spiked()){
@@ -76,7 +81,6 @@ bool Neuron::update(int time, double extCurr){
         
         //set it as new potential
         setMemPot(newMemPot);
-
     }
     
     clock = clock+1;
@@ -103,8 +107,32 @@ Neuron Neuron::getConnectNeuron(int i){
     return neuron;
 }
 
-void Neuron::receive(int time){
-    buffer[time + D/h] += 1;
+bool Neuron::receive(int time){
+    //if time is smaller then bufferSize we can store +1 at time
+    int timeStep = time;
+
+        if(timeStep <= (D/h+1)){
+        buffer[timeStep + D/h] += 1;
+        return true;
+    }
+    
+    //if time is overexceeding bufferSize, we need to start from the beginning again
+    else{
+        //set buffer all to 0 bc we "start" from new with the vector
+        for(int i; i < buffer.size(); ++i){
+            buffer[i] = 0;
+        }
+        
+        //make time where we store +1 smaller till it is okay
+        do{
+            timeStep -= D/h;
+        }while(timeStep > (D/h+1));
+        
+        //now timeStep is smaller then buffersize, so we store +1
+        buffer[timeStep] += 1;
+    }
+    
+    return true;
 }
 
 

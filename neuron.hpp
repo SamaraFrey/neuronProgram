@@ -45,7 +45,7 @@ public:
     bool spiked(); //true if V over threshold
     void addConnect(Neuron other);
     Neuron getConnectNeuron(int i);
-    void receive(int time);
+    bool receive(int time);
 
     //setters&getters might be useful for later
     //setters
