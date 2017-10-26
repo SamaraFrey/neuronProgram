@@ -120,7 +120,6 @@ int main() {
 
     //calculate newMemPot and store values
     while(time <= timeStop){ //we increment always by h (which is const and defined in constants.h as long as I'm still in the intervall
-        cout << "gugus" << endl;
         for(size_t i = 0; i < allNeuron.size(); ++i){
             bool spiked;
             spiked = allNeuron[i].update(time, extCurr);
@@ -133,9 +132,9 @@ int main() {
                 allNeuron[i].putInVector(calcTime);
 
                 //if spiked also tell to buffer in connected neurons
-                for(size_t p; p < allNeuron[i].getConnecSize(); ++p){
-                    bool worked = allNeuron[i].getConnectNeuron(static_cast<int> (p+1)).receive(time); //bc first one is nullptr; i add D in function receive
-                    assert(worked == false);
+                for(int p; p < allNeuron[i].getConnecSize(); ++p){
+                    bool worked = allNeuron[i].getConnectNeuron(p+1).receive(time); //bc first one is nullptr; i add D in function receive
+                    assert(worked == true);
                 }
             }
             

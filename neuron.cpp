@@ -23,6 +23,7 @@ We store how many spikes it does and when they occur. The membrane potentials of
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <random>
 
 using namespace std;
 
@@ -31,16 +32,17 @@ Neuron::Neuron(double p, int sp, double t){
     memPot = p;
     nbrSp = sp;
     timeSp = t;
+    neuronJ = J;
     
     connections.push_back(nullptr); //for debugging purposes
     
-    vector <unsigned int> buffer (bufferSize); //buffer of size, with all entries to be zero
+    vector <unsigned int> buffer (bufferSize, 0); //buffer of size, with all entries to be zero
 }
 
 Neuron::Neuron(){
     connections.push_back(nullptr); //for debugging purposes
     
-    vector <unsigned int> buffer (bufferSize); //buffer of size, with all entries to be zero
+    vector <unsigned int> buffer (bufferSize, 0); //buffer of size, with all entries to be zero
 } //default
 
 //operators
@@ -68,15 +70,25 @@ bool Neuron::update(int time, double extCurr){
     //since buffer has size D/h+1 the time is gonna exceed it fast
     
     //since we interate through the buffervector and start again everytime when we exceed it, we substract the size till it is smaller and then can be read at correct place
-    assert(time == 0);
     
     int timeStep = time;
     if(time > bufferSize){
         timeStep = time % bufferSize; //e.g. 13%4 = 1 (bc 3*4 + 1 = 13)
     }
     
+    cout << "nina is awesome" << endl;
+    cout << bufferSize << "," << timeStep << endl;
+    
     //count the received spikes
-    int spikeNbr = buffer[timeStep-1];
+    int spikeNbr;
+    if(timeStep == 0){ //bc first time step is at the zero element of vector
+        spikeNbr = 0;
+    } else {
+        spikeNbr = buffer[timeStep-1];
+    }
+    
+    cout << "sam is here" << endl;
+    
     bool spiking = false;
     
     if(spiked()){
@@ -86,21 +98,47 @@ bool Neuron::update(int time, double extCurr){
         spiking = true;
     }
     
+    
+    //since the whole clocksystem is in steps, also the refractorytime has to be used in steps
+    int refractStep = refactime/h;
+    assert(refractStep > 0); //refractorytime is for sure never gonna be 0; so neither is the steps
+    
     //bc neuron is insensitiv for a refacttime
-    if(clock - time < refactime){
+    if (clock > refractStep and clock - time <= refractStep){
         setMemPot(0); //can use 0 or 10mV
         return true;
-    } else {
-        double newMemPot = memPot * exp(-h/tau) + extCurr * (R) * (1-exp(-h/tau))+neuronJ*spikeNbr;
-        
-        //break if negative
-        assert(getMemPot() < 0);
-        
-        //set it as new potential
-        setMemPot(newMemPot);
     }
     
-    clock = clock+1;
+    //poisson distribution of background input
+    random_device rd;
+    mt19937 gen(rd());
+    poisson_distribution<> p(lambda); //gives me back an int as default
+    
+    
+    double background = static_cast<double> (p(gen)); //change type
+    
+    while (background < 0){
+        background = p(gen);
+    }
+    
+    cout << "i'm here" << endl;
+    
+    assert(background >= 0);
+    
+    double newMemPot = memPot * exp(-h/tau) + extCurr * (R) * (1-exp(-h/tau))+spikeNbr*neuronJ + background;
+    
+    cout << "the new mem pot: " << newMemPot << endl;
+        
+    //break if negative
+    assert(getMemPot() >= 0);
+        
+    //set it as new potential
+    setMemPot(newMemPot);
+    
+    clock += 1; //increase local clock
+    
+    cout << "I'm done with the update" << endl;
+    
     return spiking;
 }
 
@@ -136,8 +174,8 @@ void Neuron::addConnect(Neuron other){
 
 /*
  This function is responsible to show to which neuron it is connected to. It is mainly done to make the private vector connection to be accessible to be able to be read.
- @param i is the place in the vector that we wanna look at
- @return    logically this function returns the neuron at that certain place of the connection vector
+ @param     i is the place in the vector that we wanna look at
+ @return    it returns the neuron at that certain place of the connection vector
 */
 
 Neuron Neuron::getConnectNeuron(int i){
@@ -154,7 +192,7 @@ Neuron Neuron::getConnectNeuron(int i){
 bool Neuron::receive(int time){
     //if time is smaller then bufferSize we can store +1 at time
     int timeStep = time;
-    assert(timeStep<0); //stop if time is negative
+    assert(timeStep >= 0); //stop if time is negative
 
     if(timeStep <= bufferSize){
         buffer[timeStep] += 1;
