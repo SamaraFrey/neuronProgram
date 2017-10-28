@@ -11,18 +11,14 @@
 
 #include <stdio.h>
 #include "neuron.hpp"
-#include "constants.h"
-
+//#include "constants.h"
 
 
 class Inhibitory: public Neuron
 {
-private:
-    double neuronJ = Ji;
-    
 public:
-
-    
+    //Constructor
+    Inhibitory(): Neuron(Ji){}
 };
 
 

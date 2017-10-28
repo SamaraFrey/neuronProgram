@@ -18,28 +18,31 @@ using namespace std;
 class Neuron
 {
 private:
-    double memPot; //initial value to be 0 //unit mV
-    int nbrSp;
-    double timeSp; //#when spikes occured //unit ms
-    double neuronJ;
+    double memPot;  //initial value to be 0 //unit mV
+    int nbrSp;      //amount of spike a neuron made
+    double timeSp;  //when last spike occured //unit ms
+    double neuronJ; //value J that changes for type of neuron
     
     int clock; //local clock
     
-    vector <double> spikeVect; //store the time of Spikes
-    vector <Neuron*> connections; //store the neurons that are connected in a vector
-    vector <unsigned int> buffer; //buffer
+    vector <double> spikeVect;      //store the time of Spikes
+    vector <unsigned int> buffer;   //buffer
+    vector <Neuron*> connections;   //store the neurons that are connected in a vector
     
 public:
     //Constructors
-    Neuron(double p, int sp, double t);
+    Neuron(double p, int sp, double t); //not needed, only for test porpuses
     Neuron(); //default
-    Neuron(const Neuron& copy) = default; //copy
+    Neuron(double Jvalue); //for subclasses to override J
+    
+    //Neuron(const Neuron& copy) = default; //copy
     
     //Destructor
-    ~Neuron(){};
+    virtual ~Neuron(){};
     
     //operators
     void operator=(Neuron* other);
+    void operator<<(Neuron write);
     
     //functions
     void putInVector(double time);
@@ -48,6 +51,7 @@ public:
     void addConnect(Neuron other);
     Neuron getConnectNeuron(int i);
     bool receive(int time);
+    bool cleanBuffer(); //set all bufferelements to 0
 
     //setters
     void setMemPot(double a){
@@ -60,10 +64,6 @@ public:
     
     void setTimeSp(double a){
         timeSp = a;
-    }
-    
-    void setNeuronJ(double J){
-        neuronJ = J;
     }
     
     

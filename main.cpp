@@ -7,6 +7,7 @@
 //
 #include "inhibitory.hpp"
 #include "exhibitory.hpp"
+#include "neuron.hpp"
 #include "constants.h"
 
 #include <cmath>
@@ -35,13 +36,21 @@ Interval setInterval();
 vector<int> getRandom(int nbrChoose, int i);
 
 int main() {
-    int nbr = Ce + Ci; //total number of neurons
-    
     vector<Neuron> allNeuron; //vectors with all the neurons ex and in
-    for(int i = 0; i < nbr; ++i){
-        Neuron neuron;
+    
+    //add first 10'000 exhibitory neurons
+    for(int i = 0; i < Ce; ++i){
+        Exhibitory neuron;
         allNeuron.push_back(neuron);
     }
+    
+    //add from the 10'001th on 2'500 inhibitory neurons
+    for(int i = 0; i < Ci; ++i){
+        Inhibitory neuron;
+        allNeuron.push_back(neuron);
+    }
+    
+    cout << "size of allNeurons is: " << allNeuron.size() << endl;
     
     //connect randomly neurons with each other
     //each neuron has connections to 250 in, 1000 ex
@@ -51,7 +60,7 @@ int main() {
     //connect the exhibitory neurons
     //which are the first neurons in the allNeuron vector
     for(int j = 0; j < Ce; ++j){
-
+        
         //generate vector (size 1000) with random nbrs from 1 to 10000 for exhib connections
         vector<int> randomVector1(getRandom(Ce, j));
         for(int p = 0; p < randomVector1.size() ; ++p){
@@ -64,7 +73,7 @@ int main() {
         vector<int> randomVector2(getRandom(Ci, j));
         for(int k = 0; k < randomVector2.size(); ++k){
             int neuronNbr2 = randomVector2[k];
-            allNeuron[j].addConnect(allNeuron[neuronNbr2]);
+            allNeuron[j].addConnect(allNeuron[Ce + neuronNbr2]); //bc we start having inhibitory neurons from 10'001th on
         }
 
     }
@@ -84,7 +93,7 @@ int main() {
         vector<int> randomVector2(getRandom(Ci, a));
         for(int k = 0; k < Ci; ++k){
             int neuronNbr2 = randomVector2[k];
-            allNeuron[a].addConnect(allNeuron[neuronNbr2]);
+            allNeuron[a].addConnect(allNeuron[Ce + neuronNbr2]); //bc we start having inhibitory neurons from 10'001th on
         }
     }
 
@@ -120,27 +129,29 @@ int main() {
 
     //calculate newMemPot and store values
     while(time <= timeStop){ //we increment always by h (which is const and defined in constants.h as long as I'm still in the intervall
+        cout << "What time is it? We have: " << time << " o'clock!" << endl;
         for(size_t i = 0; i < allNeuron.size(); ++i){
             bool spiked;
+            cout << "THIS IS NEURON: " << i+1 << endl;
             spiked = allNeuron[i].update(time, extCurr);
             
-            cout << "bobibob" << endl;
             if(spiked){
-                //if spiked -> store time in Neuron time vector
-                double calcTime = time * h;
-                allNeuron[i].setTimeSp(calcTime);
-                allNeuron[i].putInVector(calcTime);
+                cout << "YES I SPIKED ALRIGHT! -.-" << endl;
 
                 //if spiked also tell to buffer in connected neurons
-                for(int p; p < allNeuron[i].getConnecSize(); ++p){
-                    bool worked = allNeuron[i].getConnectNeuron(p+1).receive(time); //bc first one is nullptr; i add D in function receive
+                //p starts from 1 because nullptr is first element
+                for(int p = 1; p < allNeuron[i].getConnecSize(); ++p){
+                    bool worked = allNeuron[i].getConnectNeuron(p).receive(time+(D/h)); //Delay added
                     assert(worked == true);
                 }
             }
             
+            cout << "I survived the spiked-if" << endl;
+            
             //if it doesn't spike we continue here
             //to check if values calculated
             cout << allNeuron[i].getMemPot() << " , " << allNeuron[i].getNbrSp() << ", " << allNeuron[i].getTimeSp() << endl;
+            
             
             //store Membran potential in file
             double enter = allNeuron[i].getMemPot();

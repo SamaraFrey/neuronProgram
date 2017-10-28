@@ -36,14 +36,32 @@ Neuron::Neuron(double p, int sp, double t){
     
     connections.push_back(nullptr); //for debugging purposes
     
-    vector <unsigned int> buffer (bufferSize, 0); //buffer of size, with all entries to be zero
+    //buffer of size, with all entries to be zero
+    for(int i = 0; i < bufferSize; ++i){
+        buffer.push_back(0);
+    }
 }
 
 Neuron::Neuron(){
+    neuronJ = J;
     connections.push_back(nullptr); //for debugging purposes
     
-    vector <unsigned int> buffer (bufferSize, 0); //buffer of size, with all entries to be zero
-} //default
+    //buffer of size, with all entries to be zero
+    for(int i = 0; i < bufferSize; ++i){
+        buffer.push_back(0);
+    }
+}
+
+Neuron::Neuron(double Jvalue){
+    neuronJ = Jvalue;
+    connections.push_back(nullptr); //for debugging purposes
+    
+    //buffer of size, with all entries to be zero
+    for(int i = 0; i < bufferSize; ++i){
+        buffer.push_back(0);
+    }
+}
+
 
 //operators
 void Neuron::operator=(Neuron* other){
@@ -51,6 +69,10 @@ void Neuron::operator=(Neuron* other){
     nbrSp  = other->getNbrSp();
     timeSp = other->getTimeSp();
     clock  = other->getClock();
+}
+
+void Neuron::operator<<(Neuron write){
+    cout << "my nbr of spikes: " << getNbrSp() << ", the time of spikes: " << getTimeSp() << ", the membrane pot: " << getMemPot() << endl;
 }
 
 //functions
@@ -70,45 +92,45 @@ bool Neuron::update(int time, double extCurr){
     //since buffer has size D/h+1 the time is gonna exceed it fast
     
     //since we interate through the buffervector and start again everytime when we exceed it, we substract the size till it is smaller and then can be read at correct place
-    
     int timeStep = time;
-    if(time > bufferSize){
+    if(time >= bufferSize){
         timeStep = time % bufferSize; //e.g. 13%4 = 1 (bc 3*4 + 1 = 13)
     }
     
-    cout << "nina is awesome" << endl;
-    cout << bufferSize << "," << timeStep << endl;
+    cout << "updating a neuron:" << endl;
+    cout << " " << bufferSize << "," << timeStep << endl;
+    cout << " division:" << D/h << endl;
     
     //count the received spikes
-    int spikeNbr;
-    if(timeStep == 0){ //bc first time step is at the zero element of vector
+    unsigned int spikeNbr;
+    if(timeStep == 0){ //bc first time step is at the zero element of vector and we start with time 0
         spikeNbr = 0;
     } else {
-        spikeNbr = buffer[timeStep-1];
+        spikeNbr = buffer[timeStep];
     }
     
-    cout << "sam is here" << endl;
+    cout << " the amount of spikes is: " << spikeNbr << endl;
+    cout << " the value of J is: " << neuronJ << endl;
+    cout << " local clock: " << clock << endl;
     
     bool spiking = false;
-    
-    if(spiked()){
-        //increase the nbr of spikes the neuron itself has
-        int val = getNbrSp() + 1;
-        setNbrSp(val);
-        spiking = true;
-    }
-    
     
     //since the whole clocksystem is in steps, also the refractorytime has to be used in steps
     int refractStep = refactime/h;
     assert(refractStep > 0); //refractorytime is for sure never gonna be 0; so neither is the steps
     
-    //bc neuron is insensitiv for a refacttime
-    if (clock > refractStep and clock - time <= refractStep){
-        setMemPot(0); //can use 0 or 10mV
-        return true;
+    //neuron is insensitiv for a refacttime
+    //check when neuron has last spiked
+    if(!spikeVect.empty()){
+        //if last spike as occured less then refracttime ago
+        if(clock - (timeSp/h) <= refractStep){
+            setMemPot(0); //can use 0 or 10mV
+            return false;
+        }
     }
-    
+
+    //if spike has been longer ago then refac we just continue
+
     //poisson distribution of background input
     random_device rd;
     mt19937 gen(rd());
@@ -121,23 +143,35 @@ bool Neuron::update(int time, double extCurr){
         background = p(gen);
     }
     
-    cout << "i'm here" << endl;
-    
     assert(background >= 0);
     
     double newMemPot = memPot * exp(-h/tau) + extCurr * (R) * (1-exp(-h/tau))+spikeNbr*neuronJ + background;
     
-    cout << "the new mem pot: " << newMemPot << endl;
+    cout << " the new mem pot: " << newMemPot << endl;
         
     //break if negative
     assert(getMemPot() >= 0);
+    
+    if(spiked()){
+        //increase the nbr of spikes the neuron itself has
+        setNbrSp(getNbrSp() + 1);
+        setMemPot(0);
         
+        //store the time in the spike vector and set spike time
+        setTimeSp(time*h);
+        putInVector(time*h);
+        spiking = true;
+
+        
+        cout << "! OUH you spiked! I set mempot to 0!" << endl;
+    }
+    
     //set it as new potential
     setMemPot(newMemPot);
     
     clock += 1; //increase local clock
     
-    cout << "I'm done with the update" << endl;
+    cout << " I'm done with the update" << endl;
     
     return spiking;
 }
@@ -179,6 +213,7 @@ void Neuron::addConnect(Neuron other){
 */
 
 Neuron Neuron::getConnectNeuron(int i){
+    //i added a nullptr as first element of the connection
     Neuron neuron = *connections[i];
     return neuron;
 }
@@ -191,33 +226,56 @@ Neuron Neuron::getConnectNeuron(int i){
 
 bool Neuron::receive(int time){
     //if time is smaller then bufferSize we can store +1 at time
-    int timeStep = time;
-    assert(timeStep >= 0); //stop if time is negative
+    int timeStep = time; //delay D taken in account when called
+    assert(timeStep >= 15); //stop if time is negative -> at least 15! bc delay has been added
 
-    if(timeStep <= bufferSize){
+    //modulo will not work for timestep (only 15 bc of delay) smaller then bufferSize
+    cout << "1 " << endl;
+    
+    if(timeStep < bufferSize){
         buffer[timeStep] += 1;
         return true;
     }
     
+    cout << "2 " << endl;
     //if time is overexceeding bufferSize, we need to start from the beginning again to store it at correct place
-    else{
-        //set buffer all to 0 bc we "start" from new with the vector
-        for(int i; i < bufferSize; ++i){
-            buffer[i] = 0;
-        }
-        
-        //we calculate the time till it is smaller then the bufferSize (bc we start vector again) and store it accordingly
-        do{
-            timeStep -= bufferSize;
-        }while(timeStep > bufferSize);
-        
-        //now timeStep is smaller then buffersize, so we store +1
-        buffer[timeStep] += 1;
+
+    //calculate where we store the +1
+    int storeTime = timeStep % bufferSize;
+    cout << "3 " << endl;
+    
+    assert(storeTime <= bufferSize); //will always be smaller then 16
+    cout << "4 " << endl;
+    
+    //set buffer all to 0 bc we "start" from new with the vector
+    int cleanVector = (timeStep-storeTime)/bufferSize;
+    bool cleaned;
+    if(cleanVector != 0){
+    cout << "4.5 " << endl;
+        cout << bufferSize << "," << cleanVector << endl;
+        cleaned = cleanBuffer();
     }
+    cout << "5 " << endl;
+    assert(cleaned != true); //buffer has to be cleaned
+        
+    //now timeStep is smaller then buffersize, so we store +1
+    buffer[storeTime] += 1;
+    cout << "6 " << endl;
     
     return true;
 }
 
 
+/*
+ This function has been created for debugging porpuses only. Also it makes the code more readable.
+ @return true if the buffer elements have been set to 0
+*/
 
+bool Neuron::cleanBuffer(){
+    for(int i = 0; i < bufferSize; ++i){
+        buffer[i] = 0;
+    }
+    cout << "buffer elements are all 0 now." << endl;
+    return true;
+}
 
