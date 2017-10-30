@@ -11,14 +11,13 @@
 
 #include <stdio.h>
 #include "neuron.hpp"
-//#include "constants.h"
 
 
 
 class Exhibitory: public Neuron
 {
 public:
-    //Constructor
+    //!< Constructor
     Exhibitory(): Neuron(Je){}
 };
 

@@ -11,13 +11,12 @@
 
 #include <stdio.h>
 #include "neuron.hpp"
-//#include "constants.h"
 
 
 class Inhibitory: public Neuron
 {
 public:
-    //Constructor
+    //!< Constructor
     Inhibitory(): Neuron(Ji){}
 };
 
