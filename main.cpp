@@ -50,8 +50,6 @@ int main() {
         allNeuron.push_back(neuron);
     }
     
-    cout << "size of allNeurons is: " << allNeuron.size() << endl;
-    
     //!< connect randomly neurons with each other
     //!< each neuron has connections to 250 in (Ci), 1000 ex (Ce)
     
@@ -148,13 +146,10 @@ int main() {
         for(size_t i = 0; i < allNeuron.size(); ++i){
             cout << "the time is: " << time << endl;
             bool spiked;
-            cout << "THIS IS NEURON: " << i+1 << endl;
             
             spiked = allNeuron[i].update(time, extCurr);
             
             if(spiked){
-                cout << "YES I SPIKED! ------------------------------------------------" << endl;
-
                 //!< if spiked also tell to buffer in connected neurons
                 //!< p starts from 1 because nullptr is first element
                 for(size_t p = 1; p < allNeuron[i].getConnecSize(); ++p){
@@ -179,24 +174,34 @@ int main() {
         ++time;
     }
     
+    int Spikes = 0;
     //!< store and delete the data
     for(size_t i = 0; i < allNeuron.size(); ++i){
         //!< store the spike times in file
         for(size_t j = 0; j < allNeuron[i].getSpikeVectSize(); ++j){
             double val = allNeuron[i].getSpikeVect(j);
-            spikes << val << '\t' << j << '\n';
+            spikes << val << '\t' << i << '\n';
         }
         
         //!< free pointers and delete them
         for(size_t a = 0; allNeuron[i].getConnecSize(); ++a){
-            allNeuron[i].destroyConnection();
+            bool destroyed = allNeuron[i].destroyConnection();
+            assert(destroyed == true);
         }
         
         //!< destructor will be called automatically
+        
+        //!< how many spikes do i have after 1000ms
+        Spikes += allNeuron[i].getNbrSp();
     }
+    
+    cout << "in Total we have that many spikes: " << Spikes << endl;
+    
     
     write.close();
     spikes.close();
+
+    
     
     return 0;
 }
@@ -256,9 +261,10 @@ vector<int> getRandom(int nbrChoose, int i){
     vector<int> randomNbrs (nbrChoose/10); //!< size is 10th of nbrs to choose from (10'000 -> 1'000; 2'500 -> 250)
     random_device rd;
     mt19937 gen(rd());
+    uniform_int_distribution<> d(1, nbrChoose-1); //!< whatever value -> event occurs 4 times a minute in average (now)
+
     
     for(size_t k = 0; k < randomNbrs.size(); ++k){
-        uniform_int_distribution<> d(1, nbrChoose-1); //!< whatever value -> event occurs 4 times a minute in average (now)
         randomNbrs[k] = d(gen);
         assert(randomNbrs[k] >= 1);
         

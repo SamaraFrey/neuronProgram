@@ -51,30 +51,18 @@ public:
     bool destroyConnection(); //!< free the pointers
 
     //!< setters
-    void setMemPot(double a){
-        memPot = a;
-    }
-    
-    void setNbrSp(int a){
-        nbrSp = a;
-    }
-    
-    void setTimeSp(double a){
-        timeSp = a;
-    }
-    
     
     //!< getters
     double getMemPot(){
         return memPot;
     }
+
+    double getTimeSp(){
+        return timeSp;
+    }
     
     int getNbrSp(){
         return nbrSp;
-    }
-    
-    double getTimeSp(){
-        return timeSp;
     }
     
     size_t getConnecSize(){
@@ -89,13 +77,6 @@ public:
         return spikeVect.size();
     }
     
-    int getClock(){
-        return clock;
-    }
-    
-    double getJ(){
-        return neuronJ;
-    }
 };
 
 
