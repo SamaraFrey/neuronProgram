@@ -63,7 +63,7 @@ int main() {
 
         //!< generate vector (size 1000) with random nbrs from 1 to 10000 for exhib connections
         vector<int> randomVector1(getRandom(Ne, j));
-        for(int p = 0; p < randomVector1.size() ; ++p){
+        for(size_t p = 0; p < randomVector1.size() ; ++p){
             int neuronNbr1 = randomVector1[p];
             allNeuron[j].addConnect(& allNeuron[neuronNbr1]);
         }
@@ -71,7 +71,7 @@ int main() {
         
         //!< generate vector (size 250) with random nbrs from 1 to 2500 for inhib connections
         vector<int> randomVector2(getRandom(Ni, j));
-        for(int k = 0; k < randomVector2.size(); ++k){
+        for(size_t k = 0; k < randomVector2.size(); ++k){
             int neuronNbr2 = randomVector2[k];
             allNeuron[j].addConnect(& allNeuron[Ne + neuronNbr2]); //!< bc we start having inhibitory neurons from 10'001th on
         }
@@ -84,14 +84,14 @@ int main() {
        
         //!< generate vector (size 1000) with random nbrs from 1 to 10000 for exhib connections
         vector<int> randomVector1(getRandom(Ne, a));
-        for(int p = 0; p < randomVector1.size(); ++p){
+        for(size_t p = 0; p < randomVector1.size(); ++p){
             int neuronNbr1 = randomVector1[p];
             allNeuron[a].addConnect(& allNeuron[neuronNbr1]);
         }
         
         //!< generate vector (size 250) with random nbrs from 1 to 2500 for inhib connections
         vector<int> randomVector2(getRandom(Ni, a));
-        for(int k = 0; k < randomVector2.size(); ++k){
+        for(size_t k = 0; k < randomVector2.size(); ++k){
             int neuronNbr2 = randomVector2[k];
             allNeuron[a].addConnect(& allNeuron[Ne + neuronNbr2]); //!< bc we start having inhibitory neurons from 10'001th on
         }
@@ -157,7 +157,7 @@ int main() {
 
                 //!< if spiked also tell to buffer in connected neurons
                 //!< p starts from 1 because nullptr is first element
-                for(int p = 1; p < allNeuron[i].getConnecSize(); ++p){
+                for(size_t p = 1; p < allNeuron[i].getConnecSize(); ++p){
                     bool worked = allNeuron[i].getConnectNeuron(p)->receive(time+(D/h)); //!< Delay added
                     
                     assert(worked == true);
@@ -179,20 +179,24 @@ int main() {
         ++time;
     }
     
+    //!< store and delete the data
     for(size_t i = 0; i < allNeuron.size(); ++i){
-        for(int j = 0; j < allNeuron[i].getSpikeVectSize(); ++j){
+        //!< store the spike times in file
+        for(size_t j = 0; j < allNeuron[i].getSpikeVectSize(); ++j){
             double val = allNeuron[i].getSpikeVect(j);
-            spikes << val;
-            spikes << " ";
+            spikes << val << '\t' << j << '\n';
         }
         
-        spikes << endl;
+        //!< free pointers and delete them
+        for(size_t a = 0; allNeuron[i].getConnecSize(); ++a){
+            allNeuron[i].destroyConnection();
+        }
+        
+        //!< destructor will be called automatically
     }
-    
     
     write.close();
     spikes.close();
-
     
     return 0;
 }
@@ -206,6 +210,8 @@ void checkValue(double value){
 }
 
 /*
+We have no use anymore for this function: 
+ 
 double setExtCurr(){
     double val;
     cout << "Please enter your value for external current:   ";
@@ -220,14 +226,14 @@ double setExtCurr(){
 
 Interval setInterval(){
     double val;
-    cout << "Please enter the time (double) for the Start of the time Interval:   ";
+    cout << "Please enter the time (ms) for the Start of the time Interval:   ";
     cin >> val;
     
     assert(!cin.fail());
     checkValue(val);
     
     double val2;
-    cout << "Please enter the time (double) for the End of the time Interval:   ";
+    cout << "Please enter the time (ms) for the End of the time Interval:   ";
     cin >> val2;
     
     assert(!cin.fail());

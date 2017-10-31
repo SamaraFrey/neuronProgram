@@ -48,6 +48,7 @@ public:
     Neuron * getConnectNeuron(int i);
     bool receive(int time);
     bool cleanBuffer(); //!< set all bufferelements to 0
+    bool destroyConnection(); //!< free the pointers
 
     //!< setters
     void setMemPot(double a){
@@ -80,7 +81,7 @@ public:
         return connections.size();
     }
     
-    double getSpikeVect(int i){
+    double getSpikeVect(size_t i){
         return spikeVect[i];
     }
     

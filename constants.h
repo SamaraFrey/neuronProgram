@@ -28,15 +28,15 @@ const int bufferSize = static_cast<int>(D/h) + 1; //!<size of buffer vector -> i
 const double Ji = 0.05;      //!< mv potential given by a inhibitory neuron
 const double Je = 0.1;       //!< mV potential given by a exhibitory neuron
 
-const int Ne = 1000;          //!< amount of exhib neurons
-const int Ni = 250;          //!< amount of inhib neurons
+const int Ne = 10000;          //!< amount of exhib neurons
+const int Ni = 2500;          //!< amount of inhib neurons
 
 const int Ce = Ne/10;       //!< amount of connection exhibitory
 const int Ci = Ni/10;       //!< amount of connection inhibitory
 
 //!< variables for distributions
-const double frequencyTh = treshold/(Ce*J*tau);
+const double frequencyTh = treshold/(Ce*Je*tau);
 const double frequencyExt = 2 * frequencyTh;
-const double lambda = frequencyExt * Ne * h * J; //!< constant to be used in possiondistribution
+const double lambda = frequencyExt * Ne * h * Je; //!< constant to be used in possiondistribution
 
 #endif /* constants_h */

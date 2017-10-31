@@ -91,7 +91,6 @@ bool Neuron::update(int time, double extCurr){
     }
     
     cout << "updating a neuron:" << endl;
-    cout << " " << bufferSize << "," << timeStep << endl;
     
     //!< count the received spikes
     unsigned int spikeNbr;
@@ -102,8 +101,6 @@ bool Neuron::update(int time, double extCurr){
     }
     
     cout << " the amount of spikes is: " << spikeNbr << endl;
-    cout << " the value of J is: " << neuronJ << endl;
-    cout << " local clock: " << clock << endl;
     
     bool spiking = false;
     
@@ -117,12 +114,12 @@ bool Neuron::update(int time, double extCurr){
         cout << "********** I've had some spikes already **********" << endl;
         //!< if last spike as occured less then refracttime ago
         if((clock-(timeSp/h)) <= refractStep){
-            cout << "setting mem to 0 because i just spiked recent" << endl;
+            cout << " setting mem to 0 because i just spiked recent" << endl;
             setMemPot(0); //!< can use 0 or 10mV
             clock += 1; //!< increase clock
             return false;
         }
-        cout << "Spikes have been longer then refracttime ago!" << endl;
+        cout << " Spikes have been longer then refracttime ago!" << endl;
     }
 
     //!< if spike has been longer ago then refac we just continue
@@ -134,6 +131,8 @@ bool Neuron::update(int time, double extCurr){
     
     
     double background = static_cast<double> (p(gen)); //!< change type
+    cout << "background noise is: " << background << endl;
+    cout << "old mempot is: " << memPot << endl;
     while (background < 0){
         background = p(gen);
     }
@@ -141,8 +140,6 @@ bool Neuron::update(int time, double extCurr){
     assert(background >= 0);
     
     double newMemPot = memPot * exp(-h/tau) + extCurr * (R) * (1-exp(-h/tau))+(spikeNbr+background) * neuronJ;
-    
-    cout << "The new mem pot: " << newMemPot << endl;
     
     //!< set it as new potential
     setMemPot(newMemPot);
@@ -165,8 +162,6 @@ bool Neuron::update(int time, double extCurr){
     }
 
     clock += 1; //!< increase local clock
-    
-    cout << " I'm done with the update" << endl;
     
     return spiking;
 }
@@ -262,8 +257,22 @@ bool Neuron::receive(int time){
 bool Neuron::cleanBuffer(){
     for(int i = 0; i < bufferSize; ++i){
         buffer[i] = 0;
+    }s
+    return true;
+}
+
+
+/*
+ This function will be called in the very end to free and delete the pointers of the connection vector.
+ @return true if the pointers have been freed
+*/
+
+bool Neuron::destroyConnection(){
+    for(size_t i = 0; i < connections.size(); ++i){
+        connections[i] = nullptr;
+        delete connections[i];
     }
-    cout << "buffer elements are all 0 now." << endl;
+    assert(connections.empty()); //!< if connections is not empty assert
     return true;
 }
 
