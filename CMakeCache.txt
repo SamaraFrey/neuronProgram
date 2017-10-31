@@ -14,6 +14,9 @@
 # EXTERNAL cache entries
 ########################
 
+//Build shared libraries (DLLs).
+BUILD_SHARED_LIBS:BOOL=OFF
+
 //Path to a program.
 CMAKE_AR:FILEPATH=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar
 
@@ -61,6 +64,9 @@ CMAKE_C_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
 
 //Flags used by the compiler during release builds with debug info.
 CMAKE_C_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
+
+//Generate debug library name with a postfix.
+CMAKE_DEBUG_POSTFIX:STRING=d
 
 //Flags used by the linker.
 CMAKE_EXE_LINKER_FLAGS:STRING=
@@ -179,11 +185,42 @@ CMAKE_STRIP:FILEPATH=/Applications/Xcode.app/Contents/Developer/Toolchains/Xcode
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=OFF
 
+//Path to a program.
+PYTHON_EXECUTABLE:FILEPATH=/usr/bin/python
+
 //Value Computed by CMake
 SVProject_BINARY_DIR:STATIC=/Users/samarafrey/Desktop/EPFL/BA Se 3/Programmation/SV Project/SV Project/build
 
 //Value Computed by CMake
 SVProject_SOURCE_DIR:STATIC=/Users/samarafrey/Desktop/EPFL/BA Se 3/Programmation/SV Project/SV Project
+
+//Value Computed by CMake
+gtest_BINARY_DIR:STATIC=/Users/samarafrey/Desktop/EPFL/BA Se 3/Programmation/SV Project/SV Project/build/googletest
+
+//Dependencies for target
+gtest_LIB_DEPENDS:STATIC=
+
+//Value Computed by CMake
+gtest_SOURCE_DIR:STATIC=/Users/samarafrey/Desktop/EPFL/BA Se 3/Programmation/SV Project/SV Project/googletest
+
+//Build gtest's sample programs.
+gtest_build_samples:BOOL=OFF
+
+//Build all of gtest's own tests.
+gtest_build_tests:BOOL=OFF
+
+//Disable uses of pthreads in gtest.
+gtest_disable_pthreads:BOOL=OFF
+
+//Use shared (DLL) run-time lib even when Google Test is built
+// as static lib.
+gtest_force_shared_crt:BOOL=OFF
+
+//Build gtest with internal symbols hidden in shared libraries.
+gtest_hide_internal_symbols:BOOL=OFF
+
+//Dependencies for the target
+gtest_main_LIB_DEPENDS:STATIC=general;gtest;
 
 
 ########################
@@ -256,6 +293,10 @@ CMAKE_GENERATOR:INTERNAL=Unix Makefiles
 CMAKE_GENERATOR_PLATFORM:INTERNAL=
 //Name of generator toolset.
 CMAKE_GENERATOR_TOOLSET:INTERNAL=
+//Have symbol pthread_create
+CMAKE_HAVE_LIBC_CREATE:INTERNAL=1
+//Have include pthread.h
+CMAKE_HAVE_PTHREAD_H:INTERNAL=1
 //Source directory with the top level CMakeLists.txt file for this
 // project
 CMAKE_HOME_DIRECTORY:INTERNAL=/Users/samarafrey/Desktop/EPFL/BA Se 3/Programmation/SV Project/SV Project
@@ -319,4 +360,10 @@ CMAKE_STRIP-ADVANCED:INTERNAL=1
 CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
+//Details about finding PythonInterp
+FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[/usr/bin/python][v2.7.10()]
+//Details about finding Threads
+FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
+//ADVANCED property for variable: PYTHON_EXECUTABLE
+PYTHON_EXECUTABLE-ADVANCED:INTERNAL=1
 
