@@ -31,7 +31,6 @@ private:
     
 public:
     //!< Constructors
-    Neuron(double p, int sp, double t); //!< not needed, only for test porpuses
     Neuron(); //!< default
     Neuron(double Jvalue); //!< for subclasses to override J
     
@@ -78,6 +77,31 @@ public:
     }
     
 };
+
+
+/**
+ * This class is for the exhibitory neurons, which have a different value for J.
+*/
+
+class Exhibitory: public Neuron
+{
+public:
+    //! Constructor
+    Exhibitory(): Neuron(Je){}
+};
+
+
+/**
+ * This class is for the inhibitory neurons, which have a different value for J.
+*/
+
+class Inhibitory: public Neuron
+{
+public:
+    //! Constructor
+    Inhibitory(): Neuron(Ji){}
+};
+
 
 
 #endif /* neuron_hpp */

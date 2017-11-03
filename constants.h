@@ -9,11 +9,12 @@
 #ifndef constants_h
 #define constants_h
 
-//!< this file contains all the constant we use for the equations
 
-//!< my time measurment will be in ms
-//!< I will use mV as the unit of the potentials
-
+/**
+ * This file contains all the constant we use for the equations
+ * All the time measurments will be in ms.
+ * All the potentials are in mV.
+*/
 
 const double tau = 20;      //!< ms constant
 const double h = 0.1;       //!< ms constant
@@ -28,13 +29,13 @@ const int bufferSize = static_cast<int>(D/h) + 1; //!<size of buffer vector -> i
 const double Ji = -0.5;      //!< mv potential given by a inhibitory neuron
 const double Je = 0.1;       //!< mV potential given by a exhibitory neuron
 
-const int Ne = 10000;          //!< amount of exhib neurons
-const int Ni = 2500;           //!< amount of inhib neurons
+const int Ne = 10000;        //!< amount of exhib neurons
+const int Ni = 2500;         //!< amount of inhib neurons
 
 const int Ce = Ne/10;        //!< amount of connection exhibitory
 const int Ci = Ni/10;        //!< amount of connection inhibitory
 
-//!< variables for distributions
+//! Variables for distributions
 const double frequencyTh = treshold/(Ce*Je*tau);
 const double frequencyExt = 2 * frequencyTh;
 const double lambda = frequencyExt * Ne * h * Je; //!< constant to be used in possiondistribution
