@@ -30,28 +30,33 @@ private:
     vector <Neuron*> connections;   //!< store the neurons that are connected in a vector
     
 public:
-    //!< Constructors
-    Neuron(); //!< default
-    Neuron(double Jvalue); //!< for subclasses to override J
+    // Constructors:
+    //! This constructor is called if no arguments are passed.
+    Neuron();
     
-    Neuron(const Neuron& copy) = default; //!< copy
+    // Constructor with arguments:
+    //! This constructor is called if the value J has to be different. Ergo will be called by its subclasses
+    Neuron(double Jvalue);
     
-    //!< Destructor
-    virtual ~Neuron(){};
+    //! Copy constructor
+    Neuron(const Neuron& copy) = default;
     
-    //!< functions
+    //! Destructor
+    ~Neuron(){};
+    
+    //Functions
     void putInVector(double time);
     bool update(int time, double extCurr);
-    bool spiked(); //!< true if V over threshold
+    bool spiked();
     void addConnect(Neuron * other);
     Neuron * getConnectNeuron(int i);
     bool receive(int time);
-    bool cleanBuffer(); //!< set all bufferelements to 0
-    bool destroyConnection(); //!< free the pointers
+    bool cleanBuffer();
+    bool destroyConnection();
 
-    //!< setters
+    //setters
     
-    //!< getters
+    //getters
     double getMemPot(){
         return memPot;
     }
@@ -81,6 +86,7 @@ public:
 
 /**
  * This class is for the exhibitory neurons, which have a different value for J.
+ * The only thing needed, is a constructor which initializes another value for J.
 */
 
 class Exhibitory: public Neuron
@@ -93,6 +99,7 @@ public:
 
 /**
  * This class is for the inhibitory neurons, which have a different value for J.
+ * The only thing needed, is a constructor which initializes another value for J.
 */
 
 class Inhibitory: public Neuron

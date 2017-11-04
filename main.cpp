@@ -23,6 +23,8 @@
 
 using namespace std;
 
+
+//! Structure for Interval. Since we enter an interval for our time limitations.
 struct Interval{
     double start;
     double end;

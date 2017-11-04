@@ -25,11 +25,10 @@
 
 using namespace std;
 
-//! Constructors
-//!< This constructor is called it no arguments are passed.
+
 Neuron::Neuron(){
     neuronJ = J;
-    connections.push_back(nullptr); //!< For debugging purposes our first element is going to
+    connections.push_back(nullptr); //!< For debugging purposes our first element of the connection vector is going to be a nullptr
     
     //!< Buffer of size (D/h+1), with all its entries to be zero
     for(int i = 0; i < bufferSize; ++i){
@@ -37,10 +36,9 @@ Neuron::Neuron(){
     }
 }
 
-//!< This constructor is called if the value J has to be different. Ergo will be called by its subclasses
 Neuron::Neuron(double Jvalue){
     neuronJ = Jvalue;
-    connections.push_back(nullptr); //!< For debugging purposes our first element is going to
+    connections.push_back(nullptr); //!< For debugging purposes our first element of the connection vector is going to to be a nullptr
     
     //!< Buffer of size (D/h+1), with all its entries to be zero
     for(int i = 0; i < bufferSize; ++i){
@@ -48,11 +46,11 @@ Neuron::Neuron(double Jvalue){
     }
 }
 
-//! Functions of neurons
+// Functions of neurons
 
 /**
- * Pushing back given times into the spikeVect vector, which we later on need to write the values into the spike.txt file.
- * @param time: the time the spike occured and has to be saved.
+ * This function is responsible to push back given times into the spikeVect vector, which we later on need to write into the spike.txt file.
+ * @param time: the spike occured and has to be saved.
  */
 
 void Neuron::putInVector(double time){
@@ -61,16 +59,16 @@ void Neuron::putInVector(double time){
 
 
 /**
- * This function is responsible to update the neuron, meaning it reset the membrane potential, taking account how many spike it receives and what randomly generated background noise it gets.
+ * This function is responsible to update the neuron, meaning it resets the membrane potential, taking account how many spikes it receives and what randomly generated background noise it gets.
  * @param time: is the global time, to see where we are at
- * @param the extCurr: is the external current which has been before entered in the main and now is set to 0
- * @return the update fn returns a boolean (true if updated), this helps to assure that the neuron has been updated.
+ * @param extCurr: is the external current which has in ealier steps been entered in the main and now is set to 0
+ * @return true if neuron spiked
  */
 
 bool Neuron::update(int time, double extCurr){
     /*! 
-     since buffer has size D/h+1 the time is gonna exceed it fast
-     since we interate through the buffervector and start again everytime when we exceed it, we substract the size till it is smaller and then can be read at correct place
+     Since buffer has size D/h+1 the time is going to exceed it fast.
+     Therefore we interate through the buffervector and start again everytime when we exceed it, we take the modulo of the timeStep and the buffersize to be sure where to access the buffer at.
     */
     
     int timeStep = time;
@@ -78,7 +76,7 @@ bool Neuron::update(int time, double extCurr){
         timeStep = time % bufferSize;
     }
     
-    //!< Count the spikes received at time
+    //! Count the spikes received at time
     unsigned int spikeNbr;
     
     //!< first time step is at the zero element of vector and we start with time 0
@@ -90,13 +88,14 @@ bool Neuron::update(int time, double extCurr){
     
     bool spiking = false;
     
-    //!< The whole clocksystem is in steps, therefore the refractorytime has to be used in steps as well
+    //! The whole clocksystem is in steps, therefore the refractorytime has to be used in steps as well
     int refractStep = refactime/h;
     
     //!< Refractorytime is for sure never gonna be 0; so neither is the steps
     assert(refractStep > 0);
     
-    //! The neuron is insensitiv for a refacttime
+    //! The neuron is insensitiv for a refacttime.
+    
     //!< If my spikeVect is not empty, then check when neuron has had last spike
     if(!spikeVect.empty()){
         
@@ -108,22 +107,23 @@ bool Neuron::update(int time, double extCurr){
         }
     }
 
-    //!< If spike has been longer ago then refracttime, we just continue
+    //!< If spike has been longer ago then refracttime, we just continue.
 
-    //!< Generating background noise of the brain by possion distribution
+    //! Generating background noise of the brain by possion distribution
     static random_device rd;
     static mt19937 gen(rd());
     static poisson_distribution<> p(lambda); //!< Pois() gives me back an int as default
     
-    double background = static_cast<double> (p(gen)); //!< change type
-    assert(background >= 0); //!< background noise can't be negativ (Pois() is never negative)
+    double background = static_cast<double> (p(gen)); //!< change type to double
+    assert(background >= 0); //!< assert -> background noise can't be negativ (Pois() is never negative)
     
     //! Calculate membrane potential
     double newMemPot = (memPot * exp(-h/tau)) + (extCurr * (R) * (1-exp(-h/tau)))+spikeNbr * neuronJ + background * J;
     
-    //!< Set it as new potential
+    //! Set it as new potential
     memPot = newMemPot;
    
+    //! Check if neuron spiked
     if(spiked()){
         
         //!< Increase the nbr of spikes the neuron itself has
@@ -136,7 +136,7 @@ bool Neuron::update(int time, double extCurr){
         spiking = true;
     }
 
-    clock += 1; //!< Increase local clock
+    clock += 1;
     
     return spiking;
 }
@@ -145,8 +145,8 @@ bool Neuron::update(int time, double extCurr){
 /**
 * This function is responsible to tell if the neuron spikes.
 *
-* @return if the neuron spikes -> true
-*         if the neuron doesn't spike -> false
+* @return true if the neuron spikes
+*         false if the neuron doesn't spike
 */
 
 bool Neuron::spiked(){
@@ -161,57 +161,55 @@ bool Neuron::spiked(){
 
 /**
 * This function is responsible to connect neurons together, it pushes the new connected neuron in the existing connection vector.
-* @param the neuron that it is gonna be connected to
+* @param neuron that it is gonna be connected to
 */
 
 void Neuron::addConnect(Neuron * other){
-    //!< cout << "I'm connecting the neurons" << endl;
     connections.push_back(other);
 }
 
 
 /**
-* This function is responsible to show to which neuron it is connected to. It is mainly done to make the private vector connection to be accessible to be able to be read.
-* @param     i is the place in the vector that we wanna look at
-* @return    it returns the neuron at that certain place of the connection vector
+* This function is responsible to show to which neuron it is connected to. It is mainly done to make the private vector connection to be accessible to be read.
+* @param     i is the place in the vector that we wannt to look at
+* @return    neuron at that certain place of the connection vector
 */
 
 Neuron * Neuron::getConnectNeuron(int i){
-    //!< i added a nullptr as first element of the connection
+    //!< ATTENTION: connection vector has a nullptr as first element
     return connections[i];
 }
 
 
 /**
-* This function is responsible receive all the spikes it gets from its connected neurons and also to reset the buffer if necessary.
-* @param time: is the global time we need to check where we are at in the buffer
-* @return true if neuron received spike -> debug purposes
+* This function is responsible to make a neuron receive all the spikes it gets from its connected neurons and to reset the buffer if necessary.
+* @param    time is the global time we need to check where we are at in the buffer
+* @return   true if neuron received spike -> debug purposes
 */
 
 bool Neuron::receive(int time){
-    //!< If time is smaller then bufferSize we can store +1 at time
-    int timeStep = time;    //!< delay D taken in account when called
-    assert(timeStep >= D/h); //!< stop if time is negative -> at least 15! bc delay has been added
-
-    //!< Modulo will not work for timesteps that are  smaller then bufferSize (only 15 bc of delay)
+    //! If time is smaller then bufferSize we can store +1 at time
+    int timeStep = time;    //!< delay D taken in account when function is called
+    assert(timeStep >= D/h); //!< assert if time is negative -> at least 15! bc delay has been added
     
+    //! Store +1 in buffer
+    //! Modulo will not work for timesteps that are smaller then bufferSize (only 15 bc of delay)
     if(timeStep < bufferSize){
         buffer[timeStep] += 1;
         return true;
     }
     
-    //!< If time is overexceeding bufferSize, we need to start from the beginning again to store it at correct place
+    //! If time is overexceeding bufferSize, we need to start from the beginning again to store it at correct place
 
-    //!< Calculate where we store the +1
     int storeTime = timeStep % bufferSize;
 
     //!< Set buffer all to 0 because we overexceeded it and we "start" from new with the vector
     bool cleaned = cleanBuffer();
-    assert(cleaned == true); //!< Check that buffer has been cleaned
+    assert(cleaned == true); //!< assert if buffer has not been cleaned
     
-    assert(storeTime < static_cast<int> (buffer.size())); //!< assert if storeTime is bigger
+    assert(storeTime < static_cast<int> (buffer.size())); //!< assert if storeTime is bigger then the buffersize
     
-    //!< timeStep is now smaller then buffersize, so we store +1
+    //! timeStep is now garantueed smaller then buffersize, so we store +1
     buffer[storeTime] += 1;
     
     return true;
@@ -219,7 +217,7 @@ bool Neuron::receive(int time){
 
 
 /**
-* This function has been created for debugging porpuses only. Also it makes the code more readable.
+* This function has been created for debugging porpuses only. It makes the code also more readable.
 * @return true if the buffer elements have been set to 0
 */
 
@@ -243,7 +241,7 @@ bool Neuron::destroyConnection(){
     }
     connections.erase(connections.begin(), connections.end());
     
-    assert(connections.empty()); //!< if connections is not empty assert
+    assert(connections.empty()); //!< if connection vector is not empty assert
     return true;
 }
 
